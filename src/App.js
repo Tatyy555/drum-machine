@@ -68,44 +68,108 @@ const keys = [
   },
 ];
 
-const Keys = ({ props }) => {
+const Keys = (props) => {
   useEffect(() => {
+    const soundPlay = () => {
+      if (!props.power) return;
+
+      console.log(props.valiation);
+      const displayEl = document.getElementById("display");
+      displayEl.innerText = props.valiation
+        ? props.thekey.name
+        : props.thekey.name2;
+      let mysound = document.getElementById(props.thekey.key);
+      mysound.volume = props.currentVl / 100;
+      mysound.play();
+    };
+
+    const handleKeyPress = (e) => {
+      let key = e.key.toUpperCase();
+      if (key === props.thekey.key) {
+        console.log("Key pressed: " + props.valiation);
+        soundPlay();
+      }
+    };
+
     document.addEventListener("keydown", handleKeyPress);
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     };
-  }, []);
-
-  const handleKeyPress = (e) => {
-    let key = e.key.toUpperCase();
-    if (key === props.key) {
-      soundPlay();
-    }
-  };
+  }, [
+    props.valiation,
+    props.power,
+    props.currentVl,
+    props.thekey.key,
+    props.thekey.name,
+    props.thekey.name2,
+  ]);
 
   const soundPlay = () => {
+    if (!props.power) return;
+
+    console.log(props.valiation);
     const displayEl = document.getElementById("display");
-    displayEl.innerText = props.name;
-    document.getElementById(props.key).play();
+    displayEl.innerText = props.valiation
+      ? props.thekey.name
+      : props.thekey.name2;
+    let mysound = document.getElementById(props.thekey.key);
+    mysound.volume = props.currentVl / 100;
+    mysound.play();
   };
 
   return (
     <button
-      id={props.name}
+      id={props.valiation ? props.thekey.name : props.thekey.name2}
       type="button"
       data-mdb-ripple="true"
       data-mdb-ripple-color="light"
-      class="drum-pad h-[80px] w-[80px] bg-blue-600 text-white font-medium text-4xl rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
+      className="drum-pad h-[80px] w-[80px] bg-blue-600 text-white font-medium text-4xl rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
       onClick={soundPlay}
     >
-      <audio className="clip" id={props.key} src={props.url}></audio>
-      {props.key}
+      <audio
+        className="clip"
+        id={props.thekey.key}
+        src={props.valiation ? props.thekey.url : props.thekey.url2}
+      ></audio>
+      {props.thekey.key}
     </button>
   );
 };
 
 function App() {
-  const [onoff, setOnoff] = useState(true);
+  const [powerOnOff, setPowerOnOff] = useState(true);
+  const [valiationOnOff, setValiationOnOff] = useState(false);
+  const [volume, setVolume] = useState(50);
+
+  const valiationCheck = () => {
+    let currentValiationStatus = document.getElementById("valiation").checked;
+    setValiationOnOff(currentValiationStatus);
+    const displayEl = document.getElementById("display");
+    if (currentValiationStatus) {
+      displayEl.innerText = "Valiation Guitar";
+    } else {
+      displayEl.innerText = "Valiation Piano";
+    }
+  };
+
+  const powerCheck = () => {
+    let currentPowerStatus = document.getElementById("power").checked;
+    setPowerOnOff(currentPowerStatus ? false : true);
+    const displayEl = document.getElementById("display");
+    if (!currentPowerStatus) {
+      displayEl.innerText = "Power ON";
+    } else {
+      displayEl.innerText = "Power OFF";
+    }
+  };
+
+  const volumeCheck = () => {
+    let currentVolume = document.getElementById("volume").value;
+    setVolume(currentVolume);
+    console.log(currentVolume);
+    const displayEl = document.getElementById("display");
+    displayEl.innerText = "Volume: " + currentVolume;
+  };
 
   return (
     // Background
@@ -120,29 +184,35 @@ function App() {
         {/* Left (9 keys) */}
         <div className=" grid grid-cols-3 gap-[5px]">
           {keys.map((key) => (
-            <Keys key={key.key} props={key} />
+            <Keys
+              key={key.key}
+              thekey={key}
+              valiation={valiationOnOff}
+              power={powerOnOff}
+              currentVl={volume}
+            />
           ))}
         </div>
         {/* Right */}
         <div className="h-[280px] w-[200px] flex flex-col justify-center items-center">
           {/* Power */}
-          <span class=" font-medium text-gray-900 dark:text-gray-300">
+          <span className=" font-medium text-gray-900 dark:text-gray-300">
             Power
           </span>
           <label
-            for="large-toggle"
-            class="inline-flex relative items-center cursor-pointer"
+            for="power"
+            className="inline-flex relative items-center cursor-pointer"
           >
             <input
               type="checkbox"
               value=""
-              id="large-toggle"
-              class="sr-only peer"
-              checked={onoff}
+              id="power"
+              className="sr-only peer"
+              checked={powerOnOff}
             />
             <div
-              class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all  peer-checked:bg-blue-600"
-              onClick={() => (onoff ? setOnoff(false) : setOnoff(true))}
+              className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300  rounded-full peer  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all  peer-checked:bg-blue-600"
+              onClick={powerCheck}
             ></div>
           </label>
           {/* Message */}
@@ -151,29 +221,29 @@ function App() {
             className="bg-blue-600 h-[50px] w-[90%] mt-3 text-center text-white py-3 "
           ></div>
           {/* Volume */}
-          <label for="customRange1" class="form-label mt-3 font-medium">
-            Volume
-          </label>
+          <label className="form-label mt-3 font-medium">Volume</label>
           <input
             type="range"
-            class="form-range appearance-none w-[90%] h-6 p-0 bg-transparent focus:outline-none focus:ring-0 focus:shadow-none "
-            id="customRange1"
+            className="form-range appearance-none w-[90%] h-6 p-0 bg-transparent focus:outline-none focus:ring-0 focus:shadow-none "
+            id="volume"
+            onChange={volumeCheck}
           />
           {/* Valiation */}
-          <span class=" font-medium text-gray-900 dark:text-gray-300 mt-3">
+          <span className=" font-medium text-gray-900 dark:text-gray-300 mt-3">
             Valiation
           </span>
           <label
             for="valiation"
-            class="inline-flex relative items-center cursor-pointer"
+            className="inline-flex relative items-center cursor-pointer"
           >
             <input
               type="checkbox"
               value=""
               id="valiation"
-              class="sr-only peer"
+              className="sr-only peer"
+              onChange={valiationCheck}
             />
-            <div class="w-14 h-7 bg-blue-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            <div className="w-14 h-7 bg-blue-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
           </label>
         </div>
       </div>
